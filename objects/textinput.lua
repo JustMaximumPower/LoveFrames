@@ -50,6 +50,7 @@ function newobject:initialize()
 	self.showindicator = true
 	self.focus = false
 	self.multiline = false
+	self.passwordmode = false
 	self.vbar = false
 	self.hbar = false
 	self.alltextselected = false
@@ -258,6 +259,9 @@ function newobject:draw()
 	local internals = self.internals
 	local vbar = self.vbar
 	local hbar = self.hbar
+	local passwordmode = self.passwordmode
+	local multiline = self.multiline
+	local lines = self.lines 
 	
 	-- set the object's draw order
 	self:SetDrawOrder()
@@ -267,6 +271,10 @@ function newobject:draw()
 	end
 	
 	love.graphics.setStencil(stencilfunc)
+
+	if passwordmode and not multiline then
+		--self.lines = {string.rep('*', #lines[1])}
+	end
 	
 	if draw then
 		draw(self)
@@ -282,6 +290,10 @@ function newobject:draw()
 	
 	if not draw then
 		drawoverfunc(self)
+	end
+
+	if passwordmode and not multiline then
+		self.lines = lines
 	end
 
 end
@@ -1521,5 +1533,29 @@ end
 function newobject:GetAutoScroll()
 
 	return self.autoscroll
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetPasswordMode()
+	- desc: sets whether or not the textinput should act like
+		a password input feld. I.e. echo the input with '*'.
+		Is ignored in multiline mode.
+--]]---------------------------------------------------------
+function newobject:SetPasswordMode(bool)
+
+	self.passwordmode = bool
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetPasswordMode()
+	- desc: gets whether or not the textinput should act like
+		a password input feld. I.e. echo the input with '*'.
+		Is ignored in multiline mode.
+--]]---------------------------------------------------------
+function newobject:GetPasswordMode()
+
+	return self.passwordmode
 	
 end
