@@ -1,6 +1,6 @@
 --[[------------------------------------------------
 	-- Love Frames - A GUI library for LOVE --
-	-- Copyright (c) 2012 Kenny Shields --
+	-- Copyright (c) 2013 Kenny Shields --
 --]]------------------------------------------------
 
 -- multichoice class
@@ -19,9 +19,11 @@ function newobject:initialize()
 	self.height = 25
 	self.listpadding = 0
 	self.listspacing = 0
-	self.buttonscrollamount = 0.10
-	self.mousewheelscrollamount = 5
+	self.buttonscrollamount = 200
+	self.mousewheelscrollamount = 1500
+	self.sortfunc = function(a, b) return a < b end
 	self.haslist = false
+	self.dtscrolling = true
 	self.internal = false
 	self.choices = {}
 	self.listheight = nil
@@ -34,6 +36,13 @@ end
 --]]---------------------------------------------------------
 function newobject:update(dt)
 
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
 	local visible = self.visible
 	local alwaysupdate = self.alwaysupdate
 	
@@ -67,6 +76,13 @@ end
 --]]---------------------------------------------------------
 function newobject:draw()
 	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
 	local visible = self.visible
 	
 	if not visible then
@@ -99,6 +115,13 @@ end
 --]]---------------------------------------------------------
 function newobject:mousepressed(x, y, button)
 	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
 	local visible = self.visible
 	
 	if not visible then
@@ -115,6 +138,7 @@ function newobject:mousepressed(x, y, button)
 		end
 		self.haslist = true
 		self.list = loveframes.objects["multichoicelist"]:new(self)
+		self.list:SetState(self.state)
 		loveframes.hoverobject = self
 	end
 
@@ -125,6 +149,13 @@ end
 	- desc: called when the player releases a mouse button
 --]]---------------------------------------------------------
 function newobject:mousereleased(x, y, button)
+	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
 	
 	local visible = self.visible
 	
@@ -142,6 +173,24 @@ function newobject:AddChoice(choice)
 
 	local choices = self.choices
 	table.insert(choices, choice)
+	
+end
+
+--[[---------------------------------------------------------
+	- func: RemoveChoice(choice)
+	- desc: removes the specified choice from the object's 
+			list of choices
+--]]---------------------------------------------------------
+function newobject:RemoveChoice(choice)
+	
+	local choices = self.choices
+	
+	for k, v in ipairs(choices) do
+		if v == choice then
+			table.remove(choices, k)
+			break
+		end
+	end
 	
 end
 
@@ -281,5 +330,74 @@ end
 function newobject:GetButtonScrollAmount()
 
 	return self.mousewheelscrollamount
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetDTScrolling(bool)
+	- desc: sets whether or not the object should use delta
+			time when scrolling
+--]]---------------------------------------------------------
+function newobject:SetDTScrolling(bool)
+
+	self.dtscrolling = bool
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetDTScrolling()
+	- desc: gets whether or not the object should use delta
+			time when scrolling
+--]]---------------------------------------------------------
+function newobject:GetDTScrolling()
+
+	return self.dtscrolling
+	
+end
+
+--[[---------------------------------------------------------
+	- func: Sort(func)
+	- desc: sorts the object's choices
+--]]---------------------------------------------------------
+function newobject:Sort(func)
+
+	local default = self.sortfunc
+	
+	if func then
+		table.sort(self.choices, func)
+	else
+		table.sort(self.choices, default)
+	end
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetSortFunction(func)
+	- desc: sets the object's default sort function
+--]]---------------------------------------------------------
+function newobject:SetSortFunction(func)
+
+	self.sortfunc = func
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetSortFunction(func)
+	- desc: gets the object's default sort function
+--]]---------------------------------------------------------
+function newobject:GetSortFunction()
+
+	return self.sortfunc
+	
+end
+
+--[[---------------------------------------------------------
+	- func: Clear()
+	- desc: removes all choices from the object's list
+			of choices
+--]]---------------------------------------------------------
+function newobject:Clear()
+
+	self.choices = {}
 	
 end
